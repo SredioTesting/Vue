@@ -1,6 +1,7 @@
 import { ComponentInternalInstance, formatComponentName } from './component'
 import { devtoolsPerfStart, devtoolsPerfEnd } from './devtools'
 
+// eslint-disable-next-line no-restricted-globals
 const perf = typeof window !== 'undefined' && window.performance
 const timer = perf ? () => perf.now() : Date.now
 
