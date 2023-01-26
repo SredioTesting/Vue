@@ -2153,24 +2153,10 @@ function baseCreateRenderer(
 
   const remove: RemoveFn = vnode => {
     const { type, el, anchor, transition } = vnode
-    if (type === Fragment) {
-      if (
-        __DEV__ &&
-        vnode.patchFlag > 0 &&
-        vnode.patchFlag & PatchFlags.DEV_ROOT_FRAGMENT &&
-        transition &&
-        !transition.persisted
-      ) {
-        ;(vnode.children as VNode[]).forEach(child => {
-          if (child.type === Comment) {
-            hostRemove(child.el!)
-          } else {
-            remove(child)
-          }
-        })
-      } else {
-        removeFragment(el!, anchor!)
-      }
+    const isFragment = type === Fragment
+
+    if ((!__DEV__ || !transition) && isFragment) {
+      removeFragment(el!, anchor!)
       return
     }
 
@@ -2180,21 +2166,23 @@ function baseCreateRenderer(
     }
 
     const performRemove = () => {
-      hostRemove(el!)
+      isFragment ? removeFragment(el!, anchor!) : hostRemove(el!)
       if (transition && !transition.persisted && transition.afterLeave) {
         transition.afterLeave()
       }
     }
 
     if (
-      vnode.shapeFlag & ShapeFlags.ELEMENT &&
+      (isFragment || vnode.shapeFlag & ShapeFlags.ELEMENT) &&
       transition &&
       !transition.persisted
     ) {
       const { leave, delayLeave } = transition
-      const performLeave = () => leave(el!, performRemove)
+      const effectiveEl =
+        __DEV__ && !isFragment ? el! : getFirstElement(el!, anchor!)
+      const performLeave = () => leave(effectiveEl, performRemove)
       if (delayLeave) {
-        delayLeave(vnode.el!, performRemove, performLeave)
+        delayLeave(el!, performRemove, performLeave)
       } else {
         performLeave()
       }
@@ -2213,6 +2201,14 @@ function baseCreateRenderer(
       cur = next
     }
     hostRemove(end)
+  }
+
+  const getFirstElement = (cur: RendererNode, end: RendererNode) => {
+    while (cur.nodeType !== Node.ELEMENT_NODE && cur !== end) {
+      cur = hostNextSibling(cur)!
+    }
+
+    return cur
   }
 
   const unmountComponent = (
