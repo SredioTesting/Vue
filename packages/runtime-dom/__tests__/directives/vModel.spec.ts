@@ -101,6 +101,44 @@ describe('vModel', () => {
     expect(data.value).toEqual(1)
   })
 
+  it('date input should support date modifiers', async () => {
+    const component = defineComponent({
+      data() {
+        return {
+          date: null
+        }
+      },
+      render() {
+        return [
+          withVModel(
+            h('input', {
+              class: 'date',
+              type: 'date',
+              'onUpdate:modelValue': (val: any) => {
+                this.date = val
+              }
+            }),
+            this.date,
+            {
+              date: true
+            }
+          )
+        ]
+      }
+    })
+    render(h(component), root)
+
+    const date = root.querySelector('.date')
+    const data = root._vnode.component.data
+
+    date.value = '2023-02-24'
+    triggerEvent('input', date)
+    await nextTick()
+    expect((data.date as Date).valueOf()).toEqual(
+      new Date('2023-02-24').valueOf()
+    )
+  })
+
   it('should work with multiple listeners', async () => {
     const spy = vi.fn()
     const component = defineComponent({
