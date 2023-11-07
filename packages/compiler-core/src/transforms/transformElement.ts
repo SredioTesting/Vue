@@ -597,6 +597,7 @@ export function buildProps(
       }
 
       if (isVBind && isStaticArgOf(arg, 'ref') && context.scopes.vFor > 0) {
+        hasRef = true
         properties.push(
           createObjectProperty(
             createSimpleExpression('ref_for', true),
@@ -747,7 +748,7 @@ export function buildProps(
     }
   }
   if (
-    !shouldUseBlock &&
+    !(shouldUseBlock && !hasRef) &&
     (patchFlag === 0 || patchFlag === PatchFlags.HYDRATE_EVENTS) &&
     (hasRef || hasVnodeHook || runtimeDirectives.length > 0)
   ) {
