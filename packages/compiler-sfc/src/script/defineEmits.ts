@@ -8,7 +8,12 @@ import {
 } from '@babel/types'
 import { isCallOf } from './utils'
 import { ScriptCompileContext } from './context'
-import { resolveTypeElements, resolveUnionType } from './resolveType'
+import {
+  resolveTypeElements,
+  resolveUnionType,
+  resolveTypeReference,
+  resolveEnumMemberValue
+} from './resolveType'
 
 export const DEFINE_EMITS = 'defineEmits'
 
@@ -108,7 +113,8 @@ function extractEventNames(
     eventName.typeAnnotation &&
     eventName.typeAnnotation.type === 'TSTypeAnnotation'
   ) {
-    const types = resolveUnionType(ctx, eventName.typeAnnotation.typeAnnotation)
+    const typeNode = eventName.typeAnnotation.typeAnnotation
+    const types = resolveUnionType(ctx, typeNode)
 
     for (const type of types) {
       if (type.type === 'TSLiteralType') {
@@ -117,6 +123,38 @@ function extractEventNames(
           type.literal.type !== 'TemplateLiteral'
         ) {
           emits.add(String(type.literal.value))
+        }
+      } else if (type.type === 'TSEnumDeclaration') {
+        if (
+          typeNode.type === 'TSTypeReference' &&
+          typeNode.typeName.type === 'TSQualifiedName'
+        ) {
+          const memberValue = resolveEnumMemberValue(
+            ctx,
+            type,
+            typeNode.typeName.right.name
+          )
+          if (memberValue) emits.add(memberValue)
+        }
+      } else if (type.type === 'TSTypeReference') {
+        if (
+          type.typeName.type === 'TSQualifiedName' &&
+          type.typeName.left.type === 'Identifier'
+        ) {
+          const resolved = resolveTypeReference(
+            ctx,
+            type,
+            undefined,
+            type.typeName.left.name
+          )
+          if (resolved && resolved.type === 'TSEnumDeclaration') {
+            const memberValue = resolveEnumMemberValue(
+              ctx,
+              resolved,
+              type.typeName.right.name
+            )
+            if (memberValue) emits.add(memberValue)
+          }
         }
       }
     }
