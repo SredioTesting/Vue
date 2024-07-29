@@ -173,6 +173,20 @@ function createForEach(isReadonly: boolean, isShallow: boolean) {
   }
 }
 
+function createSetProtoMethod(method: TriggerOpTypes) {
+  return function (this: SetTypes, value: unknown) {
+    if (!isShallow(value) && !isReadonly(value)) {
+      value = toRaw(value)
+    }
+    const target = (this as any)[ReactiveFlags.RAW]
+    const rawTarget = toRaw(target)
+    const result = target[method](value)
+    track(rawTarget, TrackOpTypes.ITERATE, ITERATE_KEY)
+    track(value as any, TrackOpTypes.ITERATE, ITERATE_KEY)
+    return result
+  }
+}
+
 interface Iterable {
   [Symbol.iterator](): Iterator
 }
@@ -263,6 +277,17 @@ function createInstrumentations() {
     delete: deleteEntry,
     clear,
     forEach: createForEach(false, false),
+
+    // set
+    difference: createSetProtoMethod(TriggerOpTypes.DIFFERENCE),
+    intersection: createSetProtoMethod(TriggerOpTypes.INTERSECTION),
+    isDisjointFrom: createSetProtoMethod(TriggerOpTypes.IS_DISJOINT_FROM),
+    isSubsetOf: createSetProtoMethod(TriggerOpTypes.IS_SUBSET_OF),
+    isSupersetOf: createSetProtoMethod(TriggerOpTypes.IS_SUPERSET_OF),
+    symmetricDifference: createSetProtoMethod(
+      TriggerOpTypes.SYMMETRIC_DIFFERENCE,
+    ),
+    union: createSetProtoMethod(TriggerOpTypes.UNION),
   }
 
   const shallowInstrumentations: Instrumentations = {
@@ -282,6 +307,17 @@ function createInstrumentations() {
     delete: deleteEntry,
     clear,
     forEach: createForEach(false, true),
+
+    // set
+    difference: createSetProtoMethod(TriggerOpTypes.DIFFERENCE),
+    intersection: createSetProtoMethod(TriggerOpTypes.INTERSECTION),
+    isDisjointFrom: createSetProtoMethod(TriggerOpTypes.IS_DISJOINT_FROM),
+    isSubsetOf: createSetProtoMethod(TriggerOpTypes.IS_SUBSET_OF),
+    isSupersetOf: createSetProtoMethod(TriggerOpTypes.IS_SUPERSET_OF),
+    symmetricDifference: createSetProtoMethod(
+      TriggerOpTypes.SYMMETRIC_DIFFERENCE,
+    ),
+    union: createSetProtoMethod(TriggerOpTypes.UNION),
   }
 
   const readonlyInstrumentations: Instrumentations = {
@@ -299,6 +335,17 @@ function createInstrumentations() {
     delete: createReadonlyMethod(TriggerOpTypes.DELETE),
     clear: createReadonlyMethod(TriggerOpTypes.CLEAR),
     forEach: createForEach(true, false),
+
+    // set
+    difference: createSetProtoMethod(TriggerOpTypes.DIFFERENCE),
+    intersection: createSetProtoMethod(TriggerOpTypes.INTERSECTION),
+    isDisjointFrom: createSetProtoMethod(TriggerOpTypes.IS_DISJOINT_FROM),
+    isSubsetOf: createSetProtoMethod(TriggerOpTypes.IS_SUBSET_OF),
+    isSupersetOf: createSetProtoMethod(TriggerOpTypes.IS_SUPERSET_OF),
+    symmetricDifference: createSetProtoMethod(
+      TriggerOpTypes.SYMMETRIC_DIFFERENCE,
+    ),
+    union: createSetProtoMethod(TriggerOpTypes.UNION),
   }
 
   const shallowReadonlyInstrumentations: Instrumentations = {
@@ -316,6 +363,17 @@ function createInstrumentations() {
     delete: createReadonlyMethod(TriggerOpTypes.DELETE),
     clear: createReadonlyMethod(TriggerOpTypes.CLEAR),
     forEach: createForEach(true, true),
+
+    // set
+    difference: createSetProtoMethod(TriggerOpTypes.DIFFERENCE),
+    intersection: createSetProtoMethod(TriggerOpTypes.INTERSECTION),
+    isDisjointFrom: createSetProtoMethod(TriggerOpTypes.IS_DISJOINT_FROM),
+    isSubsetOf: createSetProtoMethod(TriggerOpTypes.IS_SUBSET_OF),
+    isSupersetOf: createSetProtoMethod(TriggerOpTypes.IS_SUPERSET_OF),
+    symmetricDifference: createSetProtoMethod(
+      TriggerOpTypes.SYMMETRIC_DIFFERENCE,
+    ),
+    union: createSetProtoMethod(TriggerOpTypes.UNION),
   }
 
   const iteratorMethods = [

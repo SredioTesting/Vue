@@ -12,6 +12,15 @@ export enum TriggerOpTypes {
   ADD = 'add',
   DELETE = 'delete',
   CLEAR = 'clear',
+
+  // set
+  DIFFERENCE = 'difference',
+  INTERSECTION = 'intersection',
+  IS_DISJOINT_FROM = 'isDisjointFrom',
+  IS_SUBSET_OF = 'isSubsetOf',
+  IS_SUPERSET_OF = 'isSupersetOf',
+  SYMMETRIC_DIFFERENCE = 'symmetricDifference',
+  UNION = 'union',
 }
 
 export enum ReactiveFlags {
