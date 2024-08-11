@@ -13,6 +13,7 @@ window.addEventListener('resize', setVH)
 setVH()
 
 const useSSRMode = ref(false)
+const autoSave = ref(true)
 
 const { productionMode, vueVersion, importMap } = useVueImportMap({
   runtimeDev: import.meta.env.PROD
@@ -89,6 +90,10 @@ function toggleSSR() {
   useSSRMode.value = !useSSRMode.value
 }
 
+function toggleAutoSave() {
+  autoSave.value = !autoSave.value
+}
+
 function reloadPage() {
   replRef.value?.reload()
 }
@@ -111,9 +116,11 @@ onMounted(() => {
     :store="store"
     :prod="productionMode"
     :ssr="useSSRMode"
+    :autoSave="autoSave"
     @toggle-theme="toggleTheme"
     @toggle-prod="toggleProdMode"
     @toggle-ssr="toggleSSR"
+    @toggle-autosave="toggleAutoSave"
     @reload-page="reloadPage"
   />
   <Repl
@@ -123,6 +130,7 @@ onMounted(() => {
     @keydown.ctrl.s.prevent
     @keydown.meta.s.prevent
     :ssr="useSSRMode"
+    :autoSave="autoSave"
     :store="store"
     :showCompileOutput="true"
     :autoResize="true"
