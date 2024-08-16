@@ -769,6 +769,8 @@ export function applyOptions(instance: ComponentInternalInstance): void {
   }
   if (inheritAttrs != null) {
     instance.inheritAttrs = inheritAttrs
+  } else {
+    instance.inheritAttrs = instance.appContext.config.globalInheritAttrs
   }
 
   // asset options.

@@ -112,6 +112,7 @@ export interface AppConfig {
   performance: boolean
   optionMergeStrategies: Record<string, OptionMergeFunction>
   globalProperties: ComponentCustomProperties & Record<string, any>
+  globalInheritAttrs?: boolean
   errorHandler?: (
     err: unknown,
     instance: ComponentPublicInstance | null,
@@ -212,6 +213,7 @@ export function createAppContext(): AppContext {
       performance: false,
       globalProperties: {},
       optionMergeStrategies: {},
+      globalInheritAttrs: undefined,
       errorHandler: undefined,
       warnHandler: undefined,
       compilerOptions: {},
