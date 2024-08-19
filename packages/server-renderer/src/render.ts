@@ -86,33 +86,26 @@ export function createBuffer() {
   }
 }
 
-export function renderComponentVNode(
+export async function renderComponentVNode(
   vnode: VNode,
   parentComponent: ComponentInternalInstance | null = null,
   slotScopeId?: string,
-): SSRBuffer | Promise<SSRBuffer> {
+): Promise<SSRBuffer> {
   const instance = createComponentInstance(vnode, parentComponent, null)
-  const res = setupComponent(instance, true /* isSSR */)
-  const hasAsyncSetup = isPromise(res)
-  const prefetches = instance.sp /* LifecycleHooks.SERVER_PREFETCH */
-  if (hasAsyncSetup || prefetches) {
-    let p: Promise<unknown> = hasAsyncSetup
-      ? (res as Promise<void>)
-      : Promise.resolve()
-    if (prefetches) {
-      p = p
-        .then(() =>
-          Promise.all(
-            prefetches.map(prefetch => prefetch.call(instance.proxy)),
-          ),
-        )
-        // Note: error display is already done by the wrapped lifecycle hook function.
-        .catch(NOOP)
+  await setupComponent(instance, true /* isSSR */)
+  const prefetches = instance.sp
+  if (prefetches) {
+    /* LifecycleHooks.SERVER_PREFETCH */
+    try {
+      await Promise.all(
+        prefetches.map(prefetch => prefetch.call(instance.proxy)),
+      )
+    } catch (error) {
+      // NOOP
+      // Note: error display is already done by the wrapped lifecycle hook function.
     }
-    return p.then(() => renderComponentSubTree(instance, slotScopeId))
-  } else {
-    return renderComponentSubTree(instance, slotScopeId)
   }
+  return renderComponentSubTree(instance, slotScopeId)
 }
 
 function renderComponentSubTree(
