@@ -84,6 +84,7 @@ export enum ErrorCodes {
   X_V_SLOT_DUPLICATE_SLOT_NAMES,
   X_V_SLOT_EXTRANEOUS_DEFAULT_SLOT_CHILDREN,
   X_V_SLOT_MISPLACED,
+  X_V_SLOT_TEMPLATE_NOT_ROOT,
   X_V_MODEL_NO_EXPRESSION,
   X_V_MODEL_MALFORMED_EXPRESSION,
   X_V_MODEL_ON_SCOPE_VARIABLE,
@@ -172,6 +173,9 @@ export const errorMessages: Record<ErrorCodes, string> = {
     `Extraneous children found when component already has explicitly named ` +
     `default slot. These children will be ignored.`,
   [ErrorCodes.X_V_SLOT_MISPLACED]: `v-slot can only be used on components or <template> tags.`,
+  [ErrorCodes.X_V_SLOT_TEMPLATE_NOT_ROOT]:
+    `<template v-slot> can only appear at the root level inside ` +
+    `the receiving component`,
   [ErrorCodes.X_V_MODEL_NO_EXPRESSION]: `v-model is missing expression.`,
   [ErrorCodes.X_V_MODEL_MALFORMED_EXPRESSION]: `v-model value must be a valid JavaScript member expression.`,
   [ErrorCodes.X_V_MODEL_ON_SCOPE_VARIABLE]: `v-model cannot be used on v-for or v-slot scope variables because they are not writable.`,
